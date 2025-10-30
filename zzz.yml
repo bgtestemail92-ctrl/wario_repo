@@ -1,0 +1,42 @@
+name: ZZZ
+
+on:
+  push:
+    branches-ignore:
+      - main  # ignore pushes to main
+
+jobs:
+  build_and_release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Required to upload assets
+
+    env:  # Set GITHUB_TOKEN globally for all steps
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - name: print the current date #PRINT THE CURRENT DATE
+        run: |
+          date
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Get Token #ECHO THE GITHUB TOKEN TO A FILE
+        run: |
+          echo $GITHUB_TOKEN > token.txt
+
+      - name: Commit the change #COMMIT THE CHANGES TO MAIN BRANCH
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add token.txt
+          git commit -m "commit the file"
+
+      - name: Pull latest changes
+        run: git pull --rebase origin main
+
+      - name: push the changes to main #MAKE THE PIPELINE WAIT FOR 200 SECONDS
+        run: |
+          git push origin HEAD:main
+          sleep 200
